@@ -1,0 +1,546 @@
+<#assign executeScript = 0/>
+<#assign inAdapter = 0/>
+<#if subRequests?? && subRequests?size &gt; 0>
+<#assign req_count1 = 0/>
+<#assign er_count = 0/>
+<#list errorRequests as er>
+    <#if er.iterationCount == iterationCount>
+        <#assign er_count = er_count + 1/>
+    </#if>
+</#list>
+<#list subRequests as sr>
+    <#if sr.iterationCount == iterationCount>
+        <#assign req_count1 = req_count1 + 1/>
+    </#if>
+</#list>
+
+<#if startAdapterId?length &gt; 0> <!-- отображение уже запущенного адаптера -->
+    <#assign inAdapter = 1/>
+    <#assign executeScript = 1/>
+    <#if startAdapterId == 'adapterFinished'>
+
+        <span style="">Адаптер завершил свою работу</span><br/><br/>
+        <#else>
+            <span style="font-size: smaller;color: rgb(207, 207, 207);">${startAdapterId}</span>
+            <iframe id="iframe-adapter" frameborder="0" src="" scrolling="auto" width="100%" height="85%"
+                    onload="document.getElementById('iframe-adapter').style.backgroundColor='white';"></iframe>
+    </#if>
+    <#elseif jbpm_equalsProcessVariable('isStartAdapter','yes') && req_count1 &gt; er_count>
+        <#assign inserted = []/>
+        <#assign req_count = 0/>
+        <#list subRequests as sr>
+            <#assign leg_id=sr.leg_id/>
+            <#if !inserted?seq_contains(leg_id)>
+                <#assign inserted = inserted + [leg_id]/>
+                <#assign errorReq = []/>
+                <#list errorRequests as er>
+                    <#if er.leg_id == leg_id>
+                        <#assign errorReq = errorReq + [er.index]/>
+                    </#if>
+                </#list>
+                <#list subRequests as sr2>
+                    <#if sr2.leg_id == leg_id && !errorReq?seq_contains(sr2.index) && sr2.iterationCount == iterationCount>
+                        <#assign value =  sr2.staticFields />
+                        <#assign startAdapterId = LegsVar[leg_id].processKey?xhtml + '.' + value.adapterInstanceId?xhtml/>
+                        <#break>
+                    </#if>
+                </#list>
+                <#if startAdapterId != ''>
+                    <#break>
+                </#if>
+            </#if>
+        </#list>
+        <#assign inAdapter = 1/>
+        <#assign executeScript = 1/>
+        <span style="font-size: smaller;color: rgb(207, 207, 207);">${startAdapterId}</span>
+        <iframe id="iframe-adapter" frameborder="0" src="" scrolling="auto" width="100%" height="85%"
+                onload="document.getElementById('iframe-adapter').style.backgroundColor='white';"></iframe>
+
+        <#else>
+            <#assign startAdapterId = ''/>
+            <div class="tab-pane fade" id="MV">
+                <#assign is_begin = 0/>
+                <#assign inserted = []/>
+                <#assign erCount = 0/>
+                <#list errorRequests as er>
+                    <#assign leg_id=er.leg_id/>
+                    <#if !inserted?seq_contains(leg_id) && er.iterationCount == iterationCount>
+                        <#assign inserted = inserted + [leg_id]/>
+                        <#if is_begin == 0>
+                            <#assign is_begin = 1/>
+                            <div class="contentBlock errorMessage" id="divResize">
+                                Ошибка запуска адаптера
+                                <table width="100%" border="1">
+                                    <tr>
+                                        <th>
+                                            Код ошибки
+                                        </th>
+                                        <th>
+                                            Ошибка
+                                        </th>
+                                    </tr>
+                        </#if>
+                        <tr>
+                            <td colspan="2">
+                                <b>${LegsVar[leg_id].VedName?xhtml}</b><br/>
+                                ${LegsVar[leg_id].ReqName?xhtml}
+                                <br/>
+                                <font size="-2">${LegsVar[leg_id].LegId?xhtml}</font>
+                            </td>
+                        </tr>
+                        <#list errorRequests as er2>
+                            <#if er2.leg_id == leg_id && er2.iterationCount == iterationCount>
+                                <tr>
+                                    <td>
+                                        ${er2.errorCode}
+                                    </td>
+                                    <td>
+                                        ${er2.errorMessage}
+                                    </td>
+                                </tr>
+                            </#if>
+                        </#list>
+                    </#if>
+                </#list>
+                <#if is_begin = 1>
+                    </table>
+            </div>
+</#if>
+
+<#assign is_begin = 0/>
+<#assign inserted = []/>
+<#assign req_count = 0/>
+<#list subRequests as sr>
+    <#assign leg_id=sr.leg_id/>
+    <#if !inserted?seq_contains(leg_id)>
+        <#assign inserted = inserted + [leg_id]/>
+        <#assign errorReq = []/>
+        <#list errorRequests as er>
+            <#if er.leg_id == leg_id>
+                <#assign errorReq = errorReq + [er.index]/>
+            </#if>
+        </#list>
+        <#assign sr_count = 0/>
+        <#list subRequests as sr2>
+            <#if sr2.leg_id == leg_id>
+                <#assign sr_count = sr_count + 1/>
+            </#if>
+        </#list>
+        <#if errorReq?size &lt; sr_count>
+
+            <#if is_begin == 0>
+                <#assign is_begin = 1/>
+                <div id="accordion">
+                    <span>Адаптеры</span>
+                    <div>текст адаптеров</div>
+                    <span>новые адаптеры</span>
+                    <div>новый адаптер</div>
+                </div>
+
+
+                        <div class="contentBlock" id="divResize" style="display: table;">
+                            <table width="100%" class="adapterResultsTable">
+                                <tr>
+                                    <th class="reqInstanceResultRow">
+                                        <b>Идентификатор адаптера</b>
+                                    </th>
+                                    <th class="reqInstanceResultRow">
+                                        <b>Дата запроса</b>
+                                    </th>
+                                    <th class="reqInstanceResultRow">
+                                        <b>Дата ответа</b>
+                                    </th>
+                                    <th class="reqInstanceResultRow">
+                                        <b>Время на ответ</b>
+                                    </th>
+                                    <th class="reqInstanceResultRow">
+                                        <b>Крайний срок</b>
+                                    </th>
+                                    <th class="reqInstanceResultRow">
+                                        <b>Результат</b>
+                                    </th>
+                                </tr>
+            </#if>
+            <tr>
+                <td class="reqType" colspan="6">
+                    <b>${LegsVar[leg_id].VedName?xhtml}</b><br/>
+                    ${LegsVar[leg_id].ReqName?xhtml}
+                </td>
+            </tr>
+            <#list subRequests as sr2>
+                <#if sr2.leg_id == leg_id && !errorReq?seq_contains(sr2.index)>
+                    <#assign value =  sr2.staticFields />
+                    <#assign req_count = req_count + 1/>
+                    <script>$('#mv').html("Межвед (" + ${req_count} +")")</script>
+                    <#if LegsVar[leg_id].answerMaxDays!="">
+                        <#assign maxdate_long = value.requestDate?datetime("yyyy-MM-dd hh:mm (Z)")?long + LegsVar[leg_id].answerMaxDays?number?long*24*60*60*1000/>
+                        <#assign current_date = .now?long/>
+                        <!--#assign maxdate = maxdate_long?number_to_datetime?string('dd-MM-yyyy') + ' == ' + maxdate_long?number_to_datetime?string('hh:mm')/-->
+                        <tr class="adapterResult" onclick="<#if value.answerDate?string == "
+                        " && value.adapterInstanceId != "">
+                        clickNext('2','mv','${LegsVar[leg_id].processKey?xhtml}'+ '.'
+                        +'${value.adapterInstanceId?xhtml}','');"
+                    </#if>
+                    "
+                    <#if value.answerDate?string == "" && current_date gt maxdate_long>style="color: rgb(201, 51,
+                        14);"
+                        <#else>
+                            <#if value.answerDate?string != "">style="background-color: rgb(217, 250, 217);"</#if>
+                    </#if>
+                    >
+                    <#else>
+                        <#assign maxdate = "не задано"/>
+                        <tr class="adapterResult" onclick="<#if value.answerDate?string == "
+                        " && value.adapterInstanceId != "">clickNext('2','mv','${LegsVar[leg_id].processKey?xhtml}'+
+                        '.' +'${value.adapterInstanceId?xhtml}','');"
+                </#if>
+                ">
+        </#if>
+        <td class="reqInstanceResultRow">
+            <font size="-2">${value.adapterInstanceId?xhtml}</font>
+        </td>
+
+        <#if value.requestDate?string!= "">
+            <td class="reqInstanceResultRow"
+                title="${value.requestDate?xhtml?datetime('yyyy-MM-dd hh:mm (Z)')?string('dd-MM-yyyy hh:mm (Z)')}">
+                <span class="adResDate">${value.requestDate?xhtml?datetime('yyyy-MM-dd hh:mm (Z)')?string('dd-MM-yyyy')}</span><br/>
+                <span class="adResTime">${value.requestDate?xhtml?datetime('yyyy-MM-dd hh:mm (Z)')?string('hh:mm')}	</span>
+                <#else>
+                    <td class="reqInstanceResultRow" title="---">
+                        ${str_substr2(value.requestDate?xhtml,0,10)} - ${str_substr2(value.requestDate?xhtml,11,16)}
+        </#if>
+        </td>
+
+        <#if value.answerDate?string!= "">
+            <td class="reqInstanceResultRow"
+                title="${value.answerDate?xhtml?datetime('yyyy-MM-dd hh:mm (Z)')?string('dd-MM-yyyy hh:mm (Z)')}">
+                <span class="adResDate">${value.answerDate?xhtml?datetime('yyyy-MM-dd hh:mm (Z)')?string('dd-MM-yyyy')}</span><br/>
+                <span class="adResTime">${value.answerDate?xhtml?datetime('yyyy-MM-dd hh:mm (Z)')?string('hh:mm')}</span>
+                <#else>
+                    <td class="reqInstanceResultRow" title="---">
+                        ${value.answerDate?xhtml}
+        </#if>
+        </td>
+        <td class="reqInstanceResultRow">
+            ${LegsVar[leg_id].answerTermDescription?xhtml}
+        </td>
+        <td class="reqInstanceResultRow" title="${maxdate_long?number_to_datetime?string('dd-MM-yyyy hh:mm (Z)')}">
+            <span class="adResDate">${maxdate_long?number_to_datetime?string('dd-MM-yyyy')}</span><br/>
+            <span class="adResTime">${maxdate_long?number_to_datetime?string('hh:mm')}</span>
+        </td>
+        <td class="reqInstanceResultRow">
+            <#assign temp_doc = value.answerTechDoc/>
+            <#assign temp_all_doc =value.adapterAllDocuments/>
+            <#if temp_doc?has_content || temp_all_doc?has_content>
+                <#if temp_doc?has_content>
+                    <a href="#" onclick='openDocumentInstance("${temp_doc?xhtml}");'>Результат</a>
+                    <br/>
+                </#if>
+                <#if temp_all_doc?has_content>
+                    <a href="#" onclick='showAllDocuments("${temp_all_doc?xhtml}");'>Все&nbsp;документы</a>
+                </#if>
+                <#else>
+                    <span style="font-size: large;">&#9658;</span>
+            </#if>
+        </td>
+        </tr>
+    </#if>
+</#list>
+</#if>
+</#if>
+</#list>
+<#if is_begin = 1>
+    </table>
+    <!--</div>-->
+
+</#if>
+
+<!--<h3>Новый адаптер</h3>-->
+<!--<div id="second-section" class="contentBlock startNewAdapter" style="background-color: #FF9999;">-->
+    <!--Создать запрос <input type="checkbox" id="createRequestCheckbox" onChange="changeCreateRequest();"/>-->
+<!--</div>-->
+
+<!--</div>-->
+<div id='userSelectedRequests'>
+    <div class="contentBlock">
+
+        <#if Req?? && Req?size &gt; 0>
+            <table>
+                <tr>
+                    <td class="table_row" nowrap colspan="2">
+                        <input tabindex="50" type="checkbox" name="checkAll" onchange="checkAllBoxes()">
+                        <small>Выбрать все</small>
+                    </td>
+                </tr>
+                <#assign inserted = []/>
+                <#list Req as req_op>
+                    <#if req_op.ID != "">
+                        <#if !inserted?seq_contains(req_op.ID?xhtml)>
+                            <#if req_op.DEFAULT_STATE?xhtml == "1">
+                                <#assign checked = " checked"/>
+                                <#else>
+                                    <#assign checked = ""/>
+                            </#if>
+                            <tr>
+                                <td class="table_row" nowrap>
+                                    <input tabindex="100" type="checkbox" class="req"
+                                           id="${req_op.REQUEST_DESCRIPTOR?js_string?xhtml}_on"
+                                           name="LegsVar.${req_op.REQUEST_DESCRIPTOR?js_string?xhtml}.on"
+                                           onchange="setRequests()" ${checked}> x <input tabindex="1001"
+                                                                                         id="${req_op.REQUEST_DESCRIPTOR?js_string?xhtml}_execNum"
+                                                                                         name="LegsVar.${req_op.REQUEST_DESCRIPTOR?js_string?xhtml}.execNum"
+                                                                                         value="1" size="3"
+                                                                                         readonly="readonly">
+                                </td>
+                                <td class="table_row">
+                                    <b>${req_op.STATEORG_NAME?js_string?xhtml}</b><br/>
+                                    <#if req_op.SID?? && req_op.SID?length gt 0>${req_op.SID?js_string?xhtml}<br/></#if>
+                                    ${req_op.NAME?js_string?xhtml}<br/>
+                                    <#if req_op.FULLNAME?? && req_op.FULLNAME?length gt 0 && req_op.FULLNAME != req_op.NAME>
+                                        <font size="-1">${req_op.FULLNAME?js_string?xhtml}</font><br/></#if>
+
+                                    <input type="hidden" name="LegsVar.${req_op.REQUEST_DESCRIPTOR?js_string}.LegId"
+                                           value="${req_op.REQUEST_DESCRIPTOR?js_string?xhtml}"/>
+                                    <input type="hidden" name="LegsVar.${req_op.REQUEST_DESCRIPTOR?js_string}.ReqName"
+                                           value="${req_op.NAME?js_string?xhtml}"/>
+                                    <input type="hidden" name="LegsVar.${req_op.REQUEST_DESCRIPTOR?js_string}.VedName"
+                                           value="${req_op.STATEORG_NAME?js_string?xhtml}"/>
+                                    <input type="hidden"
+                                           name="LegsVar.${req_op.REQUEST_DESCRIPTOR?js_string}.answerMaxDays"
+                                           value="${req_op.TERM_PARAMETER?js_string?xhtml}"/>
+                                    <input type="hidden"
+                                           name="LegsVar.${req_op.REQUEST_DESCRIPTOR?js_string}.answerTermDescription"
+                                           value="${req_op.TERM_DESCRIPTION?js_string?xhtml}"/>
+                                    <input type="hidden"
+                                           name="LegsVar.${req_op.REQUEST_DESCRIPTOR?js_string}.processKey"
+                                           value="${req_op.PROCESS_KEY?js_string?xhtml}"/>
+                                    <input type="hidden" name="LegsVar.${req_op.REQUEST_DESCRIPTOR?js_string}.MNEMONIC"
+                                           value="${req_op.MNEMONIC?js_string?xhtml}"/>
+                                    <input type="hidden" name="LegsVar.${req_op.REQUEST_DESCRIPTOR?js_string}.SID"
+                                           value="${req_op.SID?js_string?xhtml}"/>
+                                    <input type="hidden" name="LegsVar.${req_op.REQUEST_DESCRIPTOR?js_string}.ID"
+                                           value="${req_op.ID?js_string?xhtml}"/>
+                                    <input type="hidden"
+                                           name="LegsVar.${req_op.REQUEST_DESCRIPTOR?js_string}.MNEMONIC_TP"
+                                           value="${req_op.MNEMONIC_TP?js_string?xhtml}"/>
+                                    <#if req_op.VR_SERVICE_ID??>
+                                        <input type="hidden"
+                                               name="LegsVar.${req_op.REQUEST_DESCRIPTOR?js_string}.VR_SERVICE_ID"
+                                               value="${req_op.VR_SERVICE_ID?js_string?xhtml}"/>
+                                        <#else>
+                                            <input type="hidden"
+                                                   name="LegsVar.${req_op.REQUEST_DESCRIPTOR?js_string}.VR_SERVICE_ID"
+                                                   value="*EMPTY*"/>
+                                    </#if>
+                                </td>
+
+                            </tr>
+                            <#assign inserted = inserted + [req_op.ID?xhtml]/>
+                        </#if>
+                    </#if>
+                </#list>
+            </table>
+            <#else>
+                Для вашей учетной записи нет доступных межведомственных запросов. <br/>
+                Обратитесь к администратору
+        </#if>
+    </div>
+    <input type="hidden" id="requests_ids" name="requests_ids" value="">
+    <input type="hidden" id="leg_names" name="leg_names" value="">
+    <input type="hidden" id="checkedCountInitial" name="checkedCountInitial" value="0">
+
+    <#if Req?? && Req?size &gt; 0>
+        <input type="submit" style="display:none;" id="start_adapter" name="outcome" value="Запустить адаптер">
+    </#if>
+</div>
+</#if>
+<#else>
+    <#assign startAdapterId = ''/>
+    <div id='userSelectedRequests'>
+        <div class="contentBlock">
+
+            <div class="test-div"></div>
+            <#if Req?? && Req?size &gt; 0>
+                <table>
+                    <tr>
+                        <td class="table_row" nowrap colspan="2">
+                            <input tabindex="50" type="checkbox" name="checkAll" onchange="checkAllBoxes()">
+                            <small>Выбрать все</small>
+                        </td>
+                    </tr>
+                    <#assign inserted = []/>
+                    <#list Req as req_op>
+                        <#if req_op.ID != "">
+                            <#if !inserted?seq_contains(req_op.ID?xhtml)>
+                                <#if req_op.DEFAULT_STATE?xhtml == "1">
+                                    <#assign checked = " checked"/>
+                                    <#else>
+                                        <#assign checked = ""/>
+                                </#if>
+                                <tr>
+                                    <td class="table_row" nowrap>
+                                        <input tabindex="100" type="checkbox" class="req"
+                                               id="${req_op.REQUEST_DESCRIPTOR?js_string?xhtml}_on"
+                                               name="LegsVar.${req_op.REQUEST_DESCRIPTOR?js_string?xhtml}.on"
+                                               onchange="setRequests()" ${checked}> x <input tabindex="1001"
+                                                                                             id="${req_op.REQUEST_DESCRIPTOR?js_string?xhtml}_execNum"
+                                                                                             name="LegsVar.${req_op.REQUEST_DESCRIPTOR?js_string?xhtml}.execNum"
+                                                                                             onchange="setRequests()"
+                                                                                             value="1" size="3"
+                                                                                             readonly="readonly">
+                                    </td>
+                                    <td class="table_row">
+                                        <b>${req_op.STATEORG_NAME?js_string?xhtml}</b><br/>
+                                        <#if req_op.SID?? && req_op.SID?length gt 0>${req_op.SID?js_string?xhtml}<br/>
+                                        </#if>
+                                        ${req_op.NAME?js_string?xhtml}<br/>
+                                        <#if req_op.FULLNAME?? && req_op.FULLNAME?length gt 0 && req_op.FULLNAME != req_op.NAME>
+                                            <font size="-1">${req_op.FULLNAME?js_string?xhtml}</font><br/></#if>
+                                    </td>
+                                    <input type="hidden" name="LegsVar.${req_op.REQUEST_DESCRIPTOR?js_string}.LegId"
+                                           value="${req_op.REQUEST_DESCRIPTOR?js_string?xhtml}"/>
+                                    <input type="hidden" name="LegsVar.${req_op.REQUEST_DESCRIPTOR?js_string}.ReqName"
+                                           value="${req_op.NAME?js_string?xhtml}"/>
+                                    <input type="hidden" name="LegsVar.${req_op.REQUEST_DESCRIPTOR?js_string}.VedName"
+                                           value="${req_op.STATEORG_NAME?js_string?xhtml}"/>
+                                    <input type="hidden"
+                                           name="LegsVar.${req_op.REQUEST_DESCRIPTOR?js_string}.answerMaxDays"
+                                           value="${req_op.TERM_PARAMETER?js_string?xhtml}"/>
+                                    <input type="hidden"
+                                           name="LegsVar.${req_op.REQUEST_DESCRIPTOR?js_string}.answerTermDescription"
+                                           value="${req_op.TERM_DESCRIPTION?js_string?xhtml}"/>
+                                    <input type="hidden"
+                                           name="LegsVar.${req_op.REQUEST_DESCRIPTOR?js_string}.processKey"
+                                           value="${req_op.PROCESS_KEY?js_string?xhtml}"/>
+                                    <input type="hidden" name="LegsVar.${req_op.REQUEST_DESCRIPTOR?js_string}.MNEMONIC"
+                                           value="${req_op.MNEMONIC?js_string?xhtml}"/>
+                                    <input type="hidden" name="LegsVar.${req_op.REQUEST_DESCRIPTOR?js_string}.SID"
+                                           value="${req_op.SID?js_string?xhtml}"/>
+                                    <input type="hidden" name="LegsVar.${req_op.REQUEST_DESCRIPTOR?js_string}.ID"
+                                           value="${req_op.ID?js_string?xhtml}"/>
+                                    <input type="hidden"
+                                           name="LegsVar.${req_op.REQUEST_DESCRIPTOR?js_string}.MNEMONIC_TP"
+                                           value="${req_op.MNEMONIC_TP?js_string?xhtml}"/>
+                                    <#if req_op.VR_SERVICE_ID??>
+                                        <input type="hidden"
+                                               name="LegsVar.${req_op.REQUEST_DESCRIPTOR?js_string}.VR_SERVICE_ID"
+                                               value="${req_op.VR_SERVICE_ID?js_string?xhtml}"/>
+                                        <#else>
+                                            <input type="hidden"
+                                                   name="LegsVar.${req_op.REQUEST_DESCRIPTOR?js_string}.VR_SERVICE_ID"
+                                                   value="*EMPTY*"/>
+                                    </#if>
+                                </tr>
+                                <#assign inserted = inserted + [req_op.ID?xhtml]/>
+                            </#if>
+                        </#if>
+                    </#list>
+                </table>
+                <#else>
+                    Для вашей учетной записи нет доступных межведомственных запросов. <br/>
+                    Обратитесь к администратору
+            </#if>
+        </div>
+        <input type="hidden" id="requests_ids" name="requests_ids" value="">
+        <input type="hidden" id="leg_names" name="leg_names" value="">
+        <input type="hidden" id="checkedCountInitial" name="checkedCountInitial" value="0">
+
+        <#if Req?? && Req?size &gt; 0>
+            <input type="submit" style="display:none;" id="start_adapter" name="outcome" value="Запустить адаптер">
+        </#if>
+    </div>
+    </#if>
+
+    <#assign previous_adapter = ''/>
+    <#assign current_adapter = ''/>
+    <#assign next_adapter = ''/>
+
+    <#if inAdapter == 1>
+        <#assign inserted = []/>
+        <#assign req_count = 0/>
+        <#assign isNext = 0/>
+        <#list subRequests as sr>
+            <#assign leg_id=sr.leg_id/>
+            <#if !inserted?seq_contains(leg_id)>
+                <#assign inserted = inserted + [leg_id]/>
+                <#assign errorReq = []/>
+                <#list errorRequests as er>
+                    <#if er.leg_id == leg_id>
+                        <#assign errorReq = errorReq + [er.index]/>
+                    </#if>
+                </#list>
+                <#list subRequests as sr2>
+                    <#if sr2.leg_id == leg_id && !errorReq?seq_contains(sr2.index)>
+                        <#assign value =  sr2.staticFields />
+                        <#assign current_process = LegsVar[leg_id].processKey?xhtml + '.' + value.adapterInstanceId?xhtml/>
+                        <#if startAdapterId != current_adapter>
+                            <#assign previous_adapter = current_adapter/>
+                            <#assign current_adapter = next_adapter/>
+                            <#assign next_adapter = current_process/>
+                            <#else>
+                                <#assign isNext = 1/>
+                                <#break>
+                        </#if>
+                    </#if>
+                </#list>
+            </#if>
+        </#list>
+        <#if isNext == 0>
+            <#if startAdapterId != current_adapter>
+                <#assign previous_adapter = current_adapter/>
+                <#assign current_adapter = next_adapter/>
+                <#assign next_adapter = ''/>
+            </#if>
+        </#if>
+    </#if>
+
+    <div class="contentBlock bottomNavButtons">
+        <div class="bottomNavButtons-left">
+            <#if inAdapter == 1 && previous_adapter != ''>
+                <input type="button" name="previous" value="Назад"
+                       onClick="clickNext('2','reload','${previous_adapter}','');">
+
+                <div class="buttonHint-left">Предыдущий адаптер (запрос)</div>
+                <#else>
+                    <input type="button" name="previous" value="Назад" onClick="clickNext('1','reload','','');">
+
+                    <div class="buttonHint-left">Открыть заявление</div>
+            </#if>
+        </div>
+
+        <div class="bottomNavButtons-right">
+            <#if inAdapter == 1>
+                <#if next_adapter != ''>
+                    <input type="button" id="next" name="next" value="Далее"
+                           onClick="clickNext('2','reload','${next_adapter}','');">
+
+                    <div class="buttonHint-right">Следующий адаптер (запрос)</div>
+                    <#else>
+                        <input type="button" id="next" name="next" value="Далее"
+                               onClick="clickNext('3','payments','','');">
+
+                        <div class="buttonHint-right">Работа с платежами</div>
+                </#if>
+                <#else>
+                    <input type="button" id="start" name="start" value="Далее"
+                           onClick="clickNext('2','start_adapter','','');">
+
+                    <div class="buttonHint-right" id="start">Запустить адаптеры</div>
+                    <input type="submit" class="left-menu" id="payments" style="display:none;" name="outcome"
+                           value="Начисления">
+            </#if>
+            <input type="button" id="next" name="next" value="Далее" onClick="clickNext('3','payments','','');">
+
+            <div class="buttonHint-right" id="next">Работа с платежами</div>
+        </div>
+    </div>
+    <#if executeScript == 1>
+        <script language="javascript" type="text/javascript">
+            showAdapter('${startAdapterId}');
+        </script>
+    </#if>
+    <#if subRequests?? && subRequests?size &gt; 0>
+        <script language="javascript" type="text/javascript">
+            changeCreateRequest();
+        </script>
+    </#if>

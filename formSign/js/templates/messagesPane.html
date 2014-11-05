@@ -1,0 +1,4 @@
+{{if info.length}}<span class="label label-success messages-pane-info">Информация{{if info.length > 1}} ${info.length}{{/if}}</span>{{/if}}
+{{if warn.length}}<span class="label label-warning messages-pane-warn">Внимание{{if warn.length > 1}} ${warn.length}{{/if}}</span>{{/if}}
+{{if errors.length}}<span class="label label-important messages-pane-errors">Ошибки{{if errors.length > 1}} ${errors.length}{{/if}}</span>{{/if}}
+{{if help.length}}<span class="label label-info messages-pane-help">Справка</span>{{/if}}

@@ -1,0 +1,9 @@
+<tr>
+    <td colspan="6">
+        {{if status}}
+        <div class="validate-message alert alert-success">Подпись верна: ${message}</div>
+        {{else}}
+        <div class="validate-message alert alert-error">Подпись некорректна: ${message}</div>
+        {{/if}}
+    </td>
+</tr>

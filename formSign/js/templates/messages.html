@@ -1,0 +1,58 @@
+{{each(index, message) info}}
+<div class="message-info alert alert-success">
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <h4 class="message-warning-header">Информация</h4>
+
+    <div class="message-warning-short">{{html message.title}}</div>
+    {{if message.text}}
+    <span class="message-warning-link link">Дополнительная информация</span>
+
+    <div class="message-warning-text-container hidden">
+        <span class="message-warning-text-selector btn">Выделить текст</span>
+        <textarea readonly="true" class="message-warning-text in-frame" rows="5">${message.text}</textarea>
+    </div>
+    {{/if}}
+</div>
+{{/each}}
+{{each(index, message) warn}}
+<div class="message-warning alert alert-block">
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <h4 class="message-warning-header">Внимание</h4>
+
+    <div class="message-warning-short">{{html message.title}}</div>
+    {{if message.text}}
+    <span class="message-warning-link link">Дополнительная информация</span>
+
+    <div class="message-warning-text-container hidden">
+        <span class="message-warning-text-selector btn">Выделить текст</span>
+        <textarea readonly="true" class="message-warning-text in-frame" rows="5">${message.text}</textarea>
+    </div>
+    {{/if}}
+</div>
+{{/each}}
+{{each(index, message) errors}}
+<div class="attachments-message-shadow"></div>
+<div class="message-error alert alert-error">
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <h4 class="message-warning-header">Ошибка</h4>
+
+    <div class="message-warning-short">{{html message.title}}</div>
+    {{if message.text}}
+    <span class="message-warning-link link">Дополнительная информация</span>
+
+    <div class="message-warning-text-container hidden">
+        <span class="message-warning-text-selector btn">Выделить текст</span>
+        <textarea readonly="true" class="message-warning-text localScroll in-frame" rows="5">${message.text}</textarea>
+    </div>
+    {{/if}}
+</div>
+
+{{/each}}
+{{each(index, message) help}}
+<div class="attachments-message-shadow"></div>
+<div class="message-error alert alert-info">
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <h4 class="message-warning-header">Справка</h4>
+    <div class="message-warning-short">{{html message.title}}</div>
+</div>
+{{/each}}

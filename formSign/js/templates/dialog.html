@@ -1,0 +1,23 @@
+<div class="titleDialog">
+    <span class="attachments-header">Подписание  элемента <a href="${fileUrl}" class='file-link' target="_blank">${fileName} </a></span>
+    {{if forCSP}}
+    <applet name='SaveFileApplet' width='0' height='0' archive='SaveFileApplet.jar'
+
+            code='org.pgg.dsig.file.SaveFileApplet'
+            codebase='../../xwiki/resources/applets/'>
+        <param name='urlRead' value=${appletUrl}>
+        <param name='cache_option' value="no">
+    </applet>
+    {{/if}}
+    <div>
+        <span class="attachments-header">Выберите ключевой сертификат:</span>
+        <div class='contenu'>
+            <div class="CertsInfoArea in-frame-flat localScroll">
+            </div>
+        </div>
+    </div>
+    <div class="buttons-pane">
+        <span class="version-pane">Используется плагин ${plugin} версия  ${version} </span>
+        <span class='closeButton btn'>Назад</span>
+    </div>
+</div>

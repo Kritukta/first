@@ -1,0 +1,138 @@
+<div>
+    <div class="attachments-dialog-shadow"></div>
+    <div class="attachments-dialog">
+        <div class="message-container">
+            <div class="attachments-dialog-header">
+        <span class="attachments-header">
+                   <a href="${stampUrl}" target="_blank">Документ в формате PDF</a> | <a href="${xwikiUrl}"
+                                                                                         target="_blank">Старая форма подписания</a>
+                            </span>
+                <div class="messages-pane">
+                </div>
+                <div class="dialog_close v-middle attachments-dialog-close"><i class="dialog_close_icon"></i><span>Закрыть</span></div>
+            </div>
+            <div class="attachments-dialog-content">
+                <div class="tab-content-main" >
+                    <div class="tabs">
+                        <ul class="nav nav-tabs">
+                            <li class="{{if !activeTabSigned}}active{{/if}}">
+                                <a href="#tabsSign" id="idtabsSign" class="attachments-dialog-content-tab"
+                                   data-toggle="tab">Подписание (${attachments.length})</a>
+                            </li>
+                            <li class="{{if activeTabSigned}}active{{/if}}">
+                                <a href="#tabsBeforeSign" class="attachments-dialog-content-tab" id="idtabsBeforeSign"
+                                   data-toggle="tab">Подписанные (${signedAttachments.length})</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content localScroll" tabindex="1">
+                            <div id="tabsSign" class="tab-pane{{if !activeTabSigned}} active{{/if}} sign-area">
+                                <table class="contentTable" tabindex="1">
+                                    <tbody>
+                                    {{if !attachments || attachments.length == 0}}
+                                    <tr>
+                                        <td>
+                                            <div class="muted text-center">Список элементов пуст</div>
+                                        </td>
+                                    </tr>
+                                    {{/if}}
+                                    {{each(index, attachment) attachments}}
+                                    <tr class="{{if index%2}}contentTable-even{{/if}}">
+                                        <td class="indicator-sign-false">
+                                            <div class="indicator-sign"></div>
+                                        </td>
+                                        <td class="file-link break-word"><a href="${attachment.loadFileUrl}"
+                                                                            target="_blank">${attachment.attachName}</a>
+                                        </td>
+                                        <td class="file-delete">
+                                            <span class="link-action link-action-red  delete-file {{if ( (attachment.attachName.indexOf('soap')==0) || ((attachment.attachName.indexOf('req_')==0) && (attachment.attachName.indexOf('.xml')!= -1)) || (attachment.attachName.indexOf('.xmlsig.xml')!= -1)  )}} hidden {{/if}}"
+                                                  data-name="${attachment.attachName}">Удалить</span>
+                                        </td>
+                                        <td class="file-sign">
+                                            <span class="link-action sign-file" data-name="${attachment.attachName}">Подписать</span>
+                                        </td>
+                                    </tr>
+                                    {{/each}}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div id="tabsBeforeSign" class="tab-pane{{if activeTabSigned}} active{{/if}} sign-area">
+                                <div class="tab-content-main" >
+                                    <table class="contentTable">
+                                        <tbody>
+                                        {{if !signedAttachments || signedAttachments.length == 0}}
+                                        <tr>
+                                            <td>
+                                                <div class="muted text-center">Список элементов пуст</div>
+                                            </td>
+                                        </tr>
+                                        {{/if}}
+                                        {{each(index, signedAttachment) signedAttachments}}
+                                        <tr class="{{if index%2}}contentTable-even{{/if}}">
+                                            <td class="indicator-sign-true">
+                                                <div class="indicator-sign"></div>
+                                            </td>
+                                            <td class="file-link break-word"><a
+                                                    href="${signedAttachment.loadFileUrl}"
+                                                    target="_blank">${signedAttachment.attachName}</a>
+                                            </td>
+                                            <td class="file-load-signed">
+                                                <a class="link-action" href="${signedAttachment.loadSignedUrl}">
+                                                    Скачать подписанный
+                                                </a>
+                                            </td>
+                                            <td class="file-resign"
+                                                data-name="${signedAttachment.attachName}">
+                                                <span class="link-action resign-file"
+                                                      data-name="${signedAttachment.attachName}">
+                                                    Переподписать
+                                                </span>
+                                            <td class="file-check-sign">
+                                                <span class="link-action check-sign"
+                                                      data-name="${signedAttachment.attachName}"
+                                                      data-signame="${signedAttachment.sigAttachName}">
+                                                    Проверить подпись
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        {{/each}}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <form id="formAddNew" method="post" enctype="multipart/form-data"
+                          onsubmit="">
+                        <div class="fileupload-button-bar">
+                            <span class="btn btn-success fileinput-button">
+                                <i class="icon-plus icon-white"></i>
+                                <span>&nbsp;Добавить файл</span>
+                                <input type="file" name="upload_file" id="fileUpload" multiple="">
+                            </span>
+                            {{if (attachments.length + signedAttachments.length) > 0}}
+                            <span class="right count-text count-text-attachments{{if activeTabSigned}} hidden{{/if}}">файлов на подпись: ${attachments.length}, всего:  ${attachments.length + signedAttachments.length}</span>
+                            <span class="right count-text count-text-signed{{if !activeTabSigned}} hidden{{/if}}">подписанных файлов: ${signedAttachments.length}, всего: ${attachments.length + signedAttachments.length}</span>
+                            {{/if}}
+                        </div>
+                    <span class="files-progress progress progress-success progress-striped">
+                        <span class="bar files-progress"></span>
+                    </span>
+                    </form>
+                </div>
+                <div class="tab-content-signform in-frame hidden">
+                </div>
+            </div>
+            <div class="attachments-dialog-footer">
+                <div class="sign-status transparent">
+                    <div class="control-group">
+                        <div class="help-inline"></div>
+                    </div>
+                </div>
+                <div class="ajax-loading-icon hidden"></div>
+                <!--<span class="btn attachments-dialog-close">Закрыть</span>-->
+            </div>
+            <div class="message">
+            </div>
+        </div>
+    </div>
+</div>

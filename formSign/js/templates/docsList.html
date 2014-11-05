@@ -1,0 +1,24 @@
+<ul>
+    {{each(index, doc) docs}}
+    <li class="all-docs-doc">
+        {{if doc.docs.length||doc.attachments.length}}
+        <a class="plus-minus"></a>
+        {{/if}}
+        <a class="file-link" href="../../..${doc.urlDoc}"
+           target="_blank">${doc.title}</a>
+        <span class="createDate">${doc.createDate}</span>
+        {{if doc.docs.length}}
+        {{tmpl({docs: doc.docs}) "docsList"}}
+        {{/if}}
+        <ul class="all-docs-subdocs">
+            {{each(index, attachment) doc.attachments}}
+            <li class="all-docs-subdocs-subdoc">
+                <a href="../../..${attachment.urlFile}"
+                   target="_blank">${attachment.filename}</a>
+                <span class="createDate">${doc.createDate}</span>
+            </li>
+            {{/each}}
+        </ul>
+    </li>
+    {{/each}}
+</ul>

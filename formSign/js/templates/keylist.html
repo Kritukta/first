@@ -1,0 +1,38 @@
+{{each(index, cert) certs}}
+<div class="cert in-frame-flat{{if ((certs.length == 1) && (cert.outdated == false))}} cert-selected{{/if}} ">
+    <div class="cert-body {{if cert.outdated== true}}cert-is-late{{/if}}" >
+        <table class="li-widget" >
+            <tr>
+                <td class="li-widget-header">ФИО:</td>
+                <td class="li-widget-content">${cert.fio}</td>
+            </tr>
+            <tr>
+                <td class="li-widget-header">Ведомство:</td>
+                <td class="li-widget-content">${cert.uz}</td>
+            </tr>
+
+            {{if cert.isFire}}
+            <tr>
+                <td class="li-widget-header">Действителен</td>
+                <td class="li-widget-content">c ${cert.from} по ${cert.to} {{if cert.outdated == true}}<span class="cert-is-late-label"> просрочен </span> {{/if}}</td>
+            </tr>
+            {{else}}
+            <tr>
+                <td class="li-widget-header">UID:</td>
+                <td class="li-widget-content">${cert.uid}</td>
+            </tr>
+            {{/if}}
+        </table>
+    </div>
+    <div class="cert-password">
+        {{if !cert.hidePassword}}
+        <span>Введите пароль&nbsp;</span>
+        <input type="password" class="passwortInput">
+        {{/if}}
+        <span class="btn btn-warning buttonSign">Подписать</span>
+    </div>
+</div>
+{{/each}}
+{{if !certs || certs.length == 0}}
+<div class="muted text-center empty-with-margin">Список сертификатов пуст</div>
+{{/if}}

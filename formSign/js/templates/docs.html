@@ -1,0 +1,30 @@
+<div>
+    <div class="attachments-dialog-shadow"></div>
+    <div class="attachments-dialog">
+        <div class="attachments-dialog-content">
+            <div class="tab-content-main">
+                <div class="tabs">
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a href="#tabsSignAllDoc" data-toggle="tab">Документы процесса</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane active sign-area">
+                            {{if !docs || docs.length == 0}}
+                            <ul>
+                                <li class="all-docs-doc">
+                                    <div class="muted">Список элементов пуст</div>
+                                </li>
+                            </ul>
+                            {{else}}
+                                {{tmpl({docs: docs}) 'docsList'}}
+                            {{/if}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="attachments-dialog-footer">
+            <span class="btn attachments-dialog-close">Закрыть</span>
+        </div>
+    </div>
+</div>

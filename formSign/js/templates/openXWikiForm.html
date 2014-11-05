@@ -1,0 +1,5 @@
+<form target="_blank" method="${method}" action="${action}">
+    {{each(index, params) params}}
+    <input type="hidden" name="${key}" value="${value}">
+    {{/each}}
+</form>
